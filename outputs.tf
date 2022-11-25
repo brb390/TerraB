@@ -1,11 +1,5 @@
-output "resource_group_name" {
-value = "${azurerm_resource_group.terraform.name}"
-}
-output "location" {
-value = "${azurerm_resource_group.terraform.location}"
-}
 output "network" {
-value = "${azurerm_virtual_network.net1.name}"
+value = azurerm_virtual_network.net1.name
 }
 output "subnet" {
 value = azurerm_subnet.subnet1.address_prefixes

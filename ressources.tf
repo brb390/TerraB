@@ -1,31 +1,29 @@
-resource "azurerm_resource_group" "terraform" {
-   name     = var.resource_group_name
-   location = var.location
-}
-
  resource "azurerm_virtual_network" "net1" {
    name                = var.reseau
    address_space       = ["10.0.0.0/16"]
-   location            = azurerm_resource_group.terraform.location
-   resource_group_name = azurerm_resource_group.terraform.name
+   location            = var.location
+   resource_group_name = var.resource_group_name
 }
 
  resource "azurerm_subnet" "subnet1" {
    name                = var.subnet
    address_prefixes    = var.subnet_cidr
    virtual_network_name = azurerm_virtual_network.net1.name
-   resource_group_name = azurerm_resource_group.terraform.name
+   resource_group_name = var.resource_group_name
+   
 }
 
 resource "azurerm_network_security_group" "linux-vm-nsg" {
   depends_on=[azurerm_virtual_network.net1]
   name                = "linux-vm-nsg"
-  location            = azurerm_resource_group.terraform.location
-  resource_group_name = azurerm_resource_group.terraform.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  
 }  
 
 resource "azurerm_network_security_rule" "ssh" {
-    resource_group_name         = azurerm_resource_group.terraform.name
+    resource_group_name         = var.resource_group_name
+    
     network_security_group_name = azurerm_network_security_group.linux-vm-nsg.name
     name                       = "AllowSSH"
     description                = "Allow SSH"
@@ -40,7 +38,8 @@ resource "azurerm_network_security_rule" "ssh" {
 }
 
 resource "azurerm_network_security_rule" "http" {
-    resource_group_name         = azurerm_resource_group.terraform.name
+    resource_group_name         = var.resource_group_name
+    
     network_security_group_name = azurerm_network_security_group.linux-vm-nsg.name
     name                       = "AllowHTTP"
     description                = "Allow HTTP"
@@ -64,8 +63,9 @@ resource "azurerm_public_ip" "publicip" {
   depends_on=[azurerm_subnet.subnet1]
   name                = "IP${count.index}"
   count               = var.nombre_de_IP
-  location            = azurerm_resource_group.terraform.location
-  resource_group_name = azurerm_resource_group.terraform.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  
   allocation_method   = "Static"
 }
 
@@ -73,8 +73,9 @@ resource "azurerm_network_interface" "networkinterface" {
   depends_on=[azurerm_subnet.subnet1]
   name                = "NIC${count.index}"
   count               = var.nombre_de_NIC
-  location            = azurerm_resource_group.terraform.location
-  resource_group_name = azurerm_resource_group.terraform.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  
     ip_configuration {
     name                          = "interne"
     subnet_id                     = azurerm_subnet.subnet1.id
@@ -85,7 +86,8 @@ resource "azurerm_network_interface" "networkinterface" {
 
 /* resource "azurerm_ssh_public_key" "sshkey" {
   name                = "sshkey"
-  resource_group_name = azurerm_resource_group.terraform.name
+  resource_group_name = var.resource_group_name
+  
   location            = "Australia East"
   public_key          = file("~/.ssh/id_rsa.pub")
 }*/
@@ -101,7 +103,7 @@ resource "azurerm_linux_virtual_machine" "VM" {
 
   admin_ssh_key {
     username   = "adminuser"
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file("${var.key_path}")
   }
   os_disk {
     caching              = "ReadWrite"

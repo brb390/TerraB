@@ -1,11 +1,3 @@
-variable "resource_group_name" {
-description = "Name of the environment"
-default = "terraform"
-}
-variable "location" {
-description = "Azure location to use"
-default = "AustraliaEast"
-}
 variable "reseau" {
 description = "Azure network to use"
 default = "net1"
@@ -42,3 +34,16 @@ variable "nombre_de_NIC" {
 description = "Le nombre de NIC"
 default = 1
 }
+variable "location" {
+description = "Le nombre de NIC"
+default = "Australia East"
+}
+variable "resource_group_name" {
+description = "groupe ressource"
+default = "rg"
+}
+variable "key_path" {
+description = "chemin vers la clefs"
+default = "~/.ssh/id_rsa.pub"
+}
+ 
